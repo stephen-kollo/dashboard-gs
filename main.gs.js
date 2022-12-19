@@ -1,125 +1,116 @@
-function dashboardMain() {
-  const spreadsheet = SpreadsheetApp.getActive();
-  const dashboard_sheet = spreadsheet.getSheetByName('Direct Debits');
-  const groups = getGroups(dashboard_sheet)
-  const care_plans = getCarePlans(dashboard_sheet)
-
-  processWeeksData(dashboard_sheet, groups, care_plans)
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu("Upload").addItem("Upload files", "importFile").addToUi();
 }
 
-function processWeeksData(dashboard_sheet, groups, care_plans) {
-  const weeks_arr = dashboard_sheet.getRange(3,2,1,dashboard_sheet.getLastColumn() - 1).getValues()[0]
-  const sums_arr = dashboard_sheet.getRange(5,2,1,dashboard_sheet.getLastColumn() - 1).getValues()[0]
+function importFile(e, doc_name, period){
+  if (!e) {
+    const output = HtmlService.createHtmlOutputFromFile("uploading_form")
+    output.setWidth(400)
+    output.setHeight(500)
+    SpreadsheetApp.getUi().showModalDialog(output, "Uploading Form")
+    return;
+  } 
+  let data
 
-  for(let i = 0; i < weeks_arr.length; i++) {
-    if (weeks_arr[i] != "" && sums_arr[i] == 0) {
-      processSingleWeekData(
-        i + 2,
-        weeks_arr[i], 
-        dashboard_sheet,
-        groups, 
-        care_plans
-      )
+  if(e[2].includes('.csv')) {
+    const file = Utilities.parseCsv(Utilities.newBlob(...e).getDataAsString());
+    data = file
+  }
+  else {
+    const file = Utilities.parseCsv(Utilities.newBlob(e).getDataAsString());
+    data = file
+  }
+  // return data
+  let res = processRawData(data, doc_name, period)
+  return res
+}
+
+function processRawData(data, doc_name, period) {
+  const weekly_DB_name = "DB (WEEKLY)"
+  let value_objects = false
+  if(doc_name == 'BranchKpiSummaryData') {
+    value_objects = {
+      objects: process_BranchKpiSummaryData(data, period),
+      db_name: weekly_DB_name
     }
-  }
-}
-
-function processSingleWeekData(column, url, dashboard_sheet, groups, care_plans) {
-  const spreadsheet = SpreadsheetApp.openByUrl(url).getSheets()[0];
-  const last_row = spreadsheet.getLastRow()
-  var rows = spreadsheet.getRange(1,1,last_row,1).getValues()
-  rows = rows.map(item => item[0])
-  // this is made to match arr id with an actual spreadsheet row not to type "row - 1" below
-  rows.unshift("none")
-
-  // CARE PLANS
-  getSumsOfCarePlans_RAW(care_plans, rows, spreadsheet)
-  console.log(care_plans)
-  care_plans.forEach(care_plan => {
-    dashboard_sheet.getRange(care_plan.row, column).setValue(care_plan.sum)
-  })
-  
-  // GROUPS
-  groups.forEach(group => {
-    group.sum = getSumOfSingleGroup_RAW(group.group_name, rows, spreadsheet).sum
-    console.log(group)
-    dashboard_sheet.getRange(group.row, column).setValue(group.sum)
-  })
-}
-
-// ######################################
-// GROUPS
-
-function getGroups(dashboard_sheet) {
-  let groups = []
-  const start_row_group_section = 18
-  const groups_array = dashboard_sheet.getRange(start_row_group_section,1,20).getValues().map(item => item[0])
-  
-  for(let i = 0; i < groups_array.length; i++) {
-    if(groups_array[i].length > 0 && groups_array[i] != "Increase/Decrease" ) {
-      groups.push({
-        group_name: groups_array[i],
-        row: i + start_row_group_section
-      })
+  } else if (doc_name == 'AppTypeByOptom') {
+    value_objects = {
+      objects: process_AppTypeByOptom(data, period),
+      db_name: weekly_DB_name
     }
-  }
-  return groups
-}
-
-function getSumOfSingleGroup_RAW(group_name, rows, spreadsheet) {
-  let range = {
-    start: rows.indexOf(group_name),
-    end: 0
-  }
-  let i = 0
-  while (rows[range.start + i] == group_name) {
-    i++;
-  }
-  range.end = i;
-  
-  let sum = 0
-  spreadsheet.getRange(range.start, 4, range.end, 1).getValues().map(item => item[0]).forEach(unit => {sum += unit})
-  
-  return {
-    sum: sum,
-  }
-}
-
-// ######################################
-// CARE PLANS
-
-function getCarePlans(dashboard_sheet) {
-  let care_plans = []
-  const start_row_care_plan_section = 7
-  const care_plans_array = dashboard_sheet.getRange(start_row_care_plan_section,1,10).getValues().map(item => item[0])
-  
-  for(let i = 0; i < care_plans_array.length; i++) {
-    if(care_plans_array[i].length > 0 && care_plans_array[i] != "Increase/Decrease" ) {
-      care_plans.push({
-        name: care_plans_array[i],
-        row: i + start_row_care_plan_section
-      })
+  } else if (doc_name == 'SchemeAnalysis') {
+    value_objects = {
+      objects: process_SchemeAnalysis(data, period),
+      db_name: weekly_DB_name
     }
-  }
-  return care_plans
-}
-
-function getSumsOfCarePlans_RAW(care_plans, rows, spreadsheet) {
-  const range = {
-    start: 1,
-    end: rows.indexOf("") - 1
-  }
-  const names_arr = spreadsheet.getRange(range.start, 1, range.end, 1).getValues().map(item => item[0])
-  const sum_arr = spreadsheet.getRange(range.start, 3, range.end, 1).getValues().map(item => item[0])
-  
-  care_plans.forEach(care_plan => {
-    care_plan.sum = 0
-    for(let i = 0; i < names_arr.length; i++) {
-      if(names_arr[i].includes(care_plan.name)) {
-        care_plan.sum += sum_arr[i]
+  } else if (doc_name == 'PatientTransactions') {
+    value_objects = {
+      objects: process_PatientTransactions(data, period),
+      db_name: 'DB (Patient Transactions)'
+    }
+  } else if (doc_name == 'DiaryNewPatientsBranch') {
+    value_objects = {
+      objects: process_DiaryNewPatientsBranch_Id(data, period),
+      db_name: 'DB (Diary New Patients Branch)'
+    }
+    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name) == 'DiaryNewPatientsBranch') {
+      value_objects = {
+        objects: process_DiaryNewPatientsBranch(data, period),
+        db_name: weekly_DB_name
       }
+    } else {
+      value_objects = false
     }
-  })
-
-  return care_plans
+  } else if (doc_name == 'WhyUs') {
+    value_objects = {
+      objects: process_WhyUs_Id(data, period),
+      db_name: 'DB (Why Us)'
+    }
+    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name) == 'WhyUs') {
+      value_objects = {
+        objects: process_WhyUs(data, period),
+        db_name: weekly_DB_name
+      }
+    } else {
+      value_objects = false 
+    }
+  }
+  return pasteValues(value_objects.objects, doc_name, value_objects.db_name)
 }
+
+function pasteValues(value_objects, doc_name, db_name) {
+  if (db_name == 'DB (WEEKLY)') {
+    pasteWeeklyValues(value_objects, doc_name)
+  } else if (db_name == 'DB (Patient Transactions)') {
+    pastePatientTransactionsValues(value_objects, doc_name)
+  } else if (db_name == 'DB (Diary New Patients Branch)') {
+    pasteDiaryNewPatientsBranchValues(value_objects, doc_name)
+  } else if (db_name == 'DB (Why Us)') {
+    pasteWhyUsValues(value_objects, doc_name)
+  }
+  return doc_name
+}
+
+
+// function test() {
+//   const data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ID: Why Us").getRange(1,1,240,7).getValues()
+
+//   let value_objects = {
+//       objects: process_WhyUs_Id(data, {qtr: '2022 / 4', week: 'week 1'}),
+//       db_name: "DB (Why Us)"
+//     }
+//   pasteValues(value_objects.objects, 'WhyUs', value_objects.db_name)
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
