@@ -57,9 +57,3 @@ function process_WhyUs_Id (data, period) {
 
   return value_objects
 }
-
-
-
-
-
-
