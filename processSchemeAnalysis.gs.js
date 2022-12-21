@@ -1,19 +1,8 @@
-// function test() {
-//   const data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SchemeAnalysis").getRange(1,1,285,5).getValues()
-
-//   let value_objects = {
-//       objects: process_SchemeAnalysis(data, {qtr: '2022 / 4', week: 'week 1'}),
-//       db_name: "DB (WEEKLY)"
-//     }
-  
-//   pasteValues(value_objects.objects, 'SchemeAnalysis', value_objects.db_name)
-// }
-
 function process_SchemeAnalysis (data, period) {
   let value_objects = []
   let branch_map = new Map();
   const plans = CARE_PLANS
-  const branches = BRANCHES
+  const branches = BRANCHES.map(x => x.name)
   
   branches.forEach(branch => {
     branch_map.set(branch, {
@@ -40,7 +29,7 @@ function process_SchemeAnalysis (data, period) {
   })
 
   data.forEach(row => {
-    if(row[4] != '' && row[0] != 'BranchName') {
+    if(row[4].length > 0 && row[0].indexOf('BranchName') == -1) {
       let key = row[0]
       plans.forEach(plan_name => {
         if(row[1].toLowerCase().indexOf(plan_name.toLowerCase()) != -1) {
@@ -68,5 +57,3 @@ function process_SchemeAnalysis (data, period) {
 
   return value_objects
 }
-
-
