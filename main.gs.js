@@ -1,8 +1,8 @@
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu("Upload").addItem("Upload files", "importFile").addToUi();
+  SpreadsheetApp.getUi().createMenu("Upload").addItem("Upload data: Weekly", "importFile").addToUi();
 }
 
-function importFile(e, doc_name, period){
+function importFile(e, doc_name, period, id_data){
   if (!e) {
     const output = HtmlService.createHtmlOutputFromFile("uploading_form")
     output.setWidth(400)
@@ -20,9 +20,13 @@ function importFile(e, doc_name, period){
     const file = Utilities.parseCsv(Utilities.newBlob(e).getDataAsString());
     data = file
   }
-  // return data
+  
   let res = processRawData(data, doc_name, period)
-  return res
+  return {
+    data: data,
+    id: res.doc_name,
+    details: res
+  }
 }
 
 function processRawData(data, doc_name, period) {
@@ -31,6 +35,27 @@ function processRawData(data, doc_name, period) {
   if(doc_name == 'BranchKpiSummaryData') {
     value_objects = {
       objects: process_BranchKpiSummaryData(data, period),
+      db_name: weekly_DB_name
+    }
+  } else if (doc_name.indexOf('RecallSuccess') != -1) {
+    value_objects = {
+      objects: process_RecallSuccess(data, period, doc_name.substring(14)),
+      db_name: weekly_DB_name
+    }
+    doc_name = 'RecallSuccess'
+  } else if (doc_name == 'ProductSalesbyBrand') {
+    value_objects = {
+      objects: process_ProductSalesByBrand(data, period),
+      db_name: weekly_DB_name
+    }
+  } else if (doc_name == 'AppointmentsByBookingDate') {
+    value_objects = {
+      objects: process_AppointmentsByBookingDate(data, period),
+      db_name: weekly_DB_name
+    }
+  } else if (doc_name == 'DiaryRecallUnchanged') {
+    value_objects = {
+      objects: process_DiaryRecallUnchanged(data, period),
       db_name: weekly_DB_name
     }
   } else if (doc_name == 'AppTypeByOptom') {
@@ -53,7 +78,7 @@ function processRawData(data, doc_name, period) {
       objects: process_DiaryNewPatientsBranch_Id(data, period),
       db_name: 'DB (Diary New Patients Branch)'
     }
-    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name) == 'DiaryNewPatientsBranch') {
+    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name).doc_name == 'DiaryNewPatientsBranch') {
       value_objects = {
         objects: process_DiaryNewPatientsBranch(data, period),
         db_name: weekly_DB_name
@@ -66,7 +91,7 @@ function processRawData(data, doc_name, period) {
       objects: process_WhyUs_Id(data, period),
       db_name: 'DB (Why Us)'
     }
-    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name) == 'WhyUs') {
+    if (pasteValues(value_objects.objects, doc_name, value_objects.db_name).doc_name == 'WhyUs') {
       value_objects = {
         objects: process_WhyUs(data, period),
         db_name: weekly_DB_name
@@ -88,29 +113,13 @@ function pasteValues(value_objects, doc_name, db_name) {
   } else if (db_name == 'DB (Why Us)') {
     pasteWhyUsValues(value_objects, doc_name)
   }
-  return doc_name
+  
+  if(doc_name == 'RecallSuccess') {
+    doc_name = `${doc_name}-${value_objects[0].branch_short}`
+  }
+  return {
+    doc_name: doc_name,
+    value_objects: value_objects,
+    db_name: db_name
+  }
 }
-
-
-// function test() {
-//   const data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ID: Why Us").getRange(1,1,240,7).getValues()
-
-//   let value_objects = {
-//       objects: process_WhyUs_Id(data, {qtr: '2022 / 4', week: 'week 1'}),
-//       db_name: "DB (Why Us)"
-//     }
-//   pasteValues(value_objects.objects, 'WhyUs', value_objects.db_name)
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
