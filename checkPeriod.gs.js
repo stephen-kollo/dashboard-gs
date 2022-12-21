@@ -40,34 +40,32 @@ function checkPeriod(new_week, new_qtr, if_checked) {
       res.err = `Period "${new_week} of QTR ${new_qtr}" doesn't match any of your last periods`
     }
   }
-  
   return res
 }
 
 function setNewWeek(week, qtr, db_sheet) {
   db_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("DB (WEEKLY)");
+  let last_col = db_sheet.getLastColumn()
   let last_row = db_sheet.getLastRow()
-  const branches = BRANCHES
-  // const total_row = last_row + branches.length + 1
+  const branches = BRANCHES.map(x => x.name)
 
   branches.forEach(branch => {
     last_row += 1
+    db_sheet.getRange(last_row, 4, 1, last_col - 3).setValue(0)
     db_sheet.getRange(last_row, 1, 1, 3).setValues([[qtr, week, branch]])
+
   })
   db_sheet.getRange(last_row + 1, 1, 1, 3).setValues([[qtr, week, 'Total']])
-  setWeeklyDBFormulas(last_row + 1)
+  setWeeklyDBFormulas(last_row + 1, branches)
 }
 
-function setWeeklyDBFormulas(total_row) {
+function setWeeklyDBFormulas(total_row, branches) {
   db_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("DB (WEEKLY)");
   const column_letters = COLUMN_LETTERS
 
-  const sumOfRowsAbove = `=SUM(R[-${BRANCHES.length}]C[0]:R[-1]C[0])`;
+  const sumOfRowsAbove = `=SUM(R[-${branches.length}]C[0]:R[-1]C[0])`;
   let formulas = column_letters.map(x => sumOfRowsAbove)
-  const cells = db_sheet.getRange(`D${total_row}:AO${total_row}`);
+  const cells = db_sheet.getRange(`D${total_row}:AL${total_row}`);
   
   cells.setFormulasR1C1([formulas]);
 }
-
-
-
