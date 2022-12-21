@@ -5,182 +5,255 @@
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js" ></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
 
-    <div class="upload-settings d-flex justify-content-between">
-      <div class="w-50">
-        <select id="week-select" class="form-select" aria-label=".form-select-sm example">
-          <option selected>Select Week</option>
-          <option value="week 1">Week 1</option>
-          <option value="week 2">Week 2</option>
-          <option value="week 3">Week 3</option>
-          <option value="week 4">Week 4</option>
-          <option value="week 5">Week 5</option>
-          <option value="week 6">Week 6</option>
-          <option value="week 7">Week 7</option>
-          <option value="week 8">Week 8</option>
-          <option value="week 9">Week 9</option>
-          <option value="week 10">Week 10</option>
-          <option value="week 11">Week 11</option>
-          <option value="week 12">Week 12</option>
-          <option value="week 13">Week 13</option>
-        </select>
+
+    <!-- SELECT PERIOD -->
+    <div id="select-period" style="display: inline;">
+      <p>Select Period</p>
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <div class="upload-settings d-flex justify-content-between">
+        <div class="w-50">
+          <select id="week-select" class="form-select" aria-label=".form-select-sm example">
+            <option selected>Select Week</option>
+            <option value="week 1">Week 1</option>
+            <option value="week 2">Week 2</option>
+            <option value="week 3">Week 3</option>
+            <option value="week 4">Week 4</option>
+            <option value="week 5">Week 5</option>
+            <option value="week 6">Week 6</option>
+            <option value="week 7">Week 7</option>
+            <option value="week 8">Week 8</option>
+            <option value="week 9">Week 9</option>
+            <option value="week 10">Week 10</option>
+            <option value="week 11">Week 11</option>
+            <option value="week 12">Week 12</option>
+            <option value="week 13">Week 13</option>
+          </select>
+        </div>
+
+        <br>
+
+        <div class="w-50">
+          <select id="qtr-select" class="form-select" aria-label=".form-select-sm example">
+            <option selected>Select QTR</option>
+            <option value="2022 / 1">2022 / 1</option>
+            <option value="2022 / 2">2022 / 2</option>
+            <option value="2022 / 3">2022 / 3</option>
+            <option value="2022 / 4">2022 / 4</option>
+            <option value="2023 / 1">2023 / 1</option>
+          </select>
+        </div>
       </div>
+      <div style="margin-top: 10px;" class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="update-previous-period">
+        <label class="form-check-label" for="flexCheckDefault">
+          Update previous period
+        </label>
+      </div>
+      <br>
+      <br>
+      <button id="select-period-button" type="button" class="btn btn-primary" onclick="selectPeriod()">Set Period</button>
+      <br>
+      <p id="select-period-status" style="display: none;">Please select both: Week and QTR</p>
+    </div>
+
+    <!-- MANUAL ENTRY -->
+    <div id="add-manual-data" style="display: none;">
+      <p id="p-period-manual"></p>
+      <!-- <div>
+        <a id="p-period-manual"></a>
+        <br>
+        <button type="button" class="btn btn-link p-0 m-0" onclick="skipManual()">Skip this part</button>
+      </div> -->
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <div id="manual-container"></div>
+      <br>
+      <button id="add-manual-data-button" type="button" class="btn btn-primary" onclick="addManualData()">Add Manual Data</button>
+      <br>
+      <p id="add-manual-data-error-msg" style="display: none;">Please fulfill all the data fields with numbers</p>
+    </div>
+
+    <!-- RECALL SUCCESS -->
+    <div id="add-recall-success-data" style="display: none;">
+      <p id="p-period-recall-success"></p>
+      <!-- <div>
+        <a id="p-period-recall-success"></a>
+        <br>
+        <button type="button" class="btn btn-link p-0 m-0" onclick="skipRecall()">Skip this part</button>
+      </div> -->
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <div id="recall-success-container"></div>
+      <br>
+      <button id="add-recall-success-data-button" type="button" class="btn btn-primary" onclick="addRecallSuccess()">Add Recall Success Data</button>
+      <br>
+      <p id="add-recall-success-data-error-msg" style="display: none;">Something went wrong, check your data please</p>
+    </div>
+
+    <!-- UPLOAD IDs -->
+    <div id="upload-ids" style="display: none;">
+      <p id="p-period-ids"></p>
+      <!-- <div>
+        <a id="p-period-ids"></a>
+        <br>
+        <button type="button" class="btn btn-link p-0 m-0" onclick="skipIds()">Skip this part</button>
+      </div> -->
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <form>
+        <label id="label-PatientTransactions" for="PatientTransactions" class="form-label">Patient Transactions</label>
+        <input class="form-control form-control-sm" id="PatientTransactions" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'PatientTransactions')" name="file">
+      </form>
 
       <br>
 
-      <div class="w-50">
-        <select id="qtr-select" class="form-select" aria-label=".form-select-sm example">
-          <option selected>Select QTR</option>
-          <option value="2022 / 1">2022 / 1</option>
-          <option value="2022 / 2">2022 / 2</option>
-          <option value="2022 / 3">2022 / 3</option>
-          <option value="2022 / 4">2022 / 4</option>
-          <option value="2023 / 1">2023 / 1</option>
-        </select>
-      </div>
+      <form>
+        <label id="label-DiaryNewPatientsBranch" for="DiaryNewPatientsBranch" class="form-label">Diary New Patients Branch</label>
+        <input class="form-control form-control-sm" id="DiaryNewPatientsBranch" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'DiaryNewPatientsBranch')" name="file">
+      </form>
+
+      <br>
+
+      <form>
+        <label id="label-WhyUs" for="WhyUs" class="form-label">Why Us</label>
+        <input class="form-control form-control-sm" id="WhyUs" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'WhyUs')" name="file">
+      </form>
+      
     </div>
 
-    <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
-    <br>
 
-    <form>
-      <label id="label-RecallSuccess" for="RecallSuccess" class="form-label">Recall Success</label>
-      <input class="form-control form-control-sm" id="RecallSuccess" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'RecallSuccess')" name="file">
-    </form>
+    <!-- UPLOAD WEEKLY -->
+    <div id="upload-weekly" style="display: none;">
+      <form>
+        <label id="label-BranchKpiSummaryData" for="BranchKpiSummaryData" class="form-label">Branch KPI Summary</label>
+        <input class="form-control form-control-sm" id="BranchKpiSummaryData" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'BranchKpiSummaryData')" name="file">
+      </form>
 
-    <br>
+      <br>
+      
+      <form>
+        <label id="label-AppointmentsByBookingDate" for="AppointmentsByBookingDate" class="form-label">Appointments By Booking Date</label>
+        <input class="form-control form-control-sm" id="AppointmentsByBookingDate" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'AppointmentsByBookingDate')" name="file">
+      </form>
 
-    <form>
-      <label id="label-DiaryNewPatientsBranch" for="DiaryNewPatientsBranch" class="form-label">Diary New Patients Branch</label>
-      <input class="form-control form-control-sm" id="DiaryNewPatientsBranch" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'DiaryNewPatientsBranch')" name="file">
-    </form>
+      <br>
 
-    <br>
-    
-    <form>
-      <label id="label-BranchKpiSummaryData" for="BranchKpiSummaryData" class="form-label">Branch KPI Summary</label>
-      <input class="form-control form-control-sm" id="BranchKpiSummaryData" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'BranchKpiSummaryData')" name="file">
-    </form>
+      <form>
+        <label id="label-AppTypeByOptom" for="AppTypeByOptom" class="form-label">App Type By Optom</label>
+        <input class="form-control form-control-sm" id="AppTypeByOptom" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'AppTypeByOptom')" name="file">
+      </form>
+      
+      <br>
 
-    <br>
-    
-    <form>
-      <label id="label-PatientTransactions" for="PatientTransactions" class="form-label">Patient Transactions</label>
-      <input class="form-control form-control-sm" id="PatientTransactions" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'PatientTransactions')" name="file">
-    </form>
+      <form>
+        <label id="label-ProductSalesbyBrand" for="ProductSalesbyBrand" class="form-label">Product Sales by Brand</label>
+        <input class="form-control form-control-sm" id="ProductSalesbyBrand" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'ProductSalesbyBrand')" name="file">
+      </form>
 
-    <br>
-    
-    <form>
-      <label id="label-AppointmentsByBookingDate" for="AppointmentsByBookingDate" class="form-label">Appointments By Booking Date</label>
-      <input class="form-control form-control-sm" id="AppointmentsByBookingDate" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'AppointmentsByBookingDate')" name="file">
-    </form>
+      <br>
+      
+      <form>
+        <label id="label-DiaryRecallUnchanged" for="DiaryRecallUnchanged" class="form-label">Diary Recall Unchanged</label>
+        <input class="form-control form-control-sm" id="DiaryRecallUnchanged" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'DiaryRecallUnchanged')" name="file">
+      </form>
+      
+      <br>
 
-    <br>
-    
-    <form>
-      <label id="label-WhyUs" for="WhyUs" class="form-label">Why Us</label>
-      <input class="form-control form-control-sm" id="WhyUs" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'WhyUs')" name="file">
-    </form>
-    
-    <br>
+      <form>
+        <label id="label-TillOpticianPerformanceAnalysis" for="TillOpticianPerformanceAnalysis" class="form-label">Till Optician Performance Analysis</label>
+        <input class="form-control form-control-sm" id="TillOpticianPerformanceAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'TillOpticianPerformanceAnalysis')" name="file">
+      </form>
+      
+      <br>
 
-    <form>
-      <label id="label-AppTypeByOptom" for="AppTypeByOptom" class="form-label">App Type By Optom</label>
-      <input class="form-control form-control-sm" id="AppTypeByOptom" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'AppTypeByOptom')" name="file">
-    </form>
-    
-    <br>
+      <form>
+        <label id="label-SchemeAnalysis" for="SchemeAnalysis" class="form-label">Scheme Analysis</label>
+        <input class="form-control form-control-sm" id="SchemeAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'SchemeAnalysis')" name="file">
+      </form>
+    </div>
 
-    <form>
-      <label id="label-ProductSalesbyBrand" for="ProductSalesbyBrand" class="form-label">Product Sales by Brand</label>
-      <input class="form-control form-control-sm" id="ProductSalesbyBrand" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'ProductSalesbyBrand')" name="file">
-    </form>
 
-    <br>
-    
-    <form>
-      <label id="label-DiaryRecallUnchanged" for="DiaryRecallUnchanged" class="form-label">Diary Recall Unchanged</label>
-      <input class="form-control form-control-sm" id="DiaryRecallUnchanged" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'DiaryRecallUnchanged')" name="file">
-    </form>
-    
-    <br>
-
-    <form>
-      <label id="label-TillOpticianPerformanceAnalysis" for="TillOpticianPerformanceAnalysis" class="form-label">Till Optician Performance Analysis</label>
-      <input class="form-control form-control-sm" id="TillOpticianPerformanceAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'TillOpticianPerformanceAnalysis')" name="file">
-    </form>
-    
-    <br>
-
-    <form>
-      <label id="label-SchemeAnalysis" for="SchemeAnalysis" class="form-label">Scheme Analysis</label>
-      <input class="form-control form-control-sm" id="SchemeAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'SchemeAnalysis')" name="file">
-    </form>
-
-    <br>
-    
-    <form>
-      <label id="label-takings(current)Data" for="takings(current)Data" class="form-label">Takings Data</label>
-      <input class="form-control form-control-sm" id="takings(current)Data" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'takings(current)Data')" name="file">
-    </form>
-    
-    <br>
-
-    <form>
-      <label id="label-debtors(current)Data" for="debtors(current)Data" class="form-label">Debtors Data</label>
-      <input class="form-control form-control-sm" id="debtors(current)Data" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'debtors(current)Data')" name="file">
-    </form>
-    
-    <br>
-
-    <form>
-      <label id="label-TillSales" for="TillSales" class="form-label">Till Sales</label>
-      <input class="form-control form-control-sm" id="TillSales" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'TillSales')" name="file">
-    </form>
-
+     <!-- SCRIPT -->
     <script>
+    let ids_calculated = false
+    
+    let consts = {
+      manual_fields_weekly: [],
+      branches: []
+    }
 
-    function getPeriod() {
-      let week = document.getElementById('week-select').value
-      let qtr = document.getElementById('qtr-select').value
+    google.script.run
+      .withSuccessHandler(writeConsts)
+      .getConsts()
+    
+    function writeConsts(res) {
+      consts = {
+        manual_fields_weekly: res.manual_fields_weekly,
+        branches: res.branches
+      }
+      createManualForm()
+      createRecallSuccessForm()
+    }
 
-      if (week == "Select Week" || qtr == "Select QTR") {
-        return false
+    let period = {
+      week: 'none',
+      qtr: 'none'
+    }
+    let id_data = {
+      patientTransactions: [],
+      diaryNewPatientsBranch: [],
+      whyUs: []
+    }
+
+    function selectPeriod() {
+      const temp_week = document.getElementById('week-select').value
+      const temp_qtr = document.getElementById('qtr-select').value
+      if(temp_week == "Select Week" || temp_qtr == "Select QTR") {
+        document.getElementById(`select-period-status`).style = "color: red; display: inline; font-size: 0.76em;"
       } else {
-        console.log(
-          {
-          week: week,
-          qtr: qtr
+        const if_update = document.getElementById(`update-previous-period`).checked
+        document.getElementById(`select-period-status`).style = "color: green; display: inline; font-size: 0.76em;"
+        document.getElementById(`select-period-status`).innerText = "Wait a second, checking period..."
+        google.script.run.withSuccessHandler(displayPeriodSuccess).checkPeriod(temp_week, temp_qtr, if_update);
+      }
+    }
+
+    function displayPeriodSuccess(res) {
+      console.log(res)
+      if (res.status) {
+        document.getElementById(`select-period-status`).innerText = "Nice!"
+        period = {
+          week: res.new_week,
+          qtr: res.new_qtr
         }
-        )
-        return {
-          week: week,
-          qtr: qtr
-        }
+        document.getElementById(`select-period`).style = "display: none;"
+        document.getElementById(`add-manual-data`).style = "display: inline;"
+        document.getElementById(`p-period-manual`).innerText = `Enter Manual Data`
+      } else {
+        document.getElementById(`select-period-status`).style = "color: red; display: inline; font-size: 0.76em;"
+        document.getElementById(`select-period-status`).innerText = res.err
       }
     }
 
     function importFile(e, doc_name) {
-      const period = getPeriod()
-      if(period == false) {
-        console.log("Please select Week and QTR")
-        return
-      }
+      let period_temp = {week: period.week.toLowerCase(), qtr: period.qtr}
       if(document.getElementById(doc_name).files[0].name.includes('.csv')) {
         file = e.file.files[0];
         const f = new FileReader();
-        f.onload = d => google.script.run.withSuccessHandler(displaySuccess).importFile([[...new Int8Array(d.target.result)], file.type, file.name], doc_name, period);
+        console.log(period)
+        f.onload = d => google.script.run.withSuccessHandler(displaySuccess).importFile([[...new Int8Array(d.target.result)], file.type, file.name], doc_name, period_temp);
         f.readAsArrayBuffer(file);
       } else {
-        processExcel(document.getElementById(doc_name).files[0], doc_name, period)
+        processExcel(document.getElementById(doc_name).files[0], doc_name, period_temp)
       }
     }
 
-    function processExcel(file, doc_name, period){
+    function processExcel(file, doc_name, period_temp){
       try {
         var reader = new FileReader();
         reader.readAsBinaryString(file);
@@ -190,7 +263,7 @@
                 type : 'binary'
             }); 
             var roa = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-            google.script.run.withSuccessHandler(displaySuccess).importFile(XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]), doc_name, period);
+            google.script.run.withSuccessHandler(displaySuccess).importFile(XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]), doc_name, period_temp, id_data);
             }
       } catch(e) {
         console.error(e);
@@ -199,9 +272,121 @@
 
     function displaySuccess(res) {
       console.log(res)
-      document.getElementById(`label-${res}`).style = "color: green"
-      google.script.host.close
+      if (res.id == 'WhyUs') {
+        id_data.whyUs = res.data
+      } else if (res.id == 'DiaryNewPatientsBranch') {
+        id_data.diaryNewPatientsBranch = res.data
+      } else if (res.id == 'PatientTransactions') {
+        id_data.patientTransactions = res.data
+      }
+      document.getElementById(`label-${res.id}`).style = "color: green"
+
+      if(!ids_calculated && id_data.patientTransactions.length > 0 && id_data.diaryNewPatientsBranch.length > 0 && id_data.whyUs.length > 0 ) {
+        document.getElementById(`upload-ids`).style = 'display: none;'
+        document.getElementById(`upload-weekly`).style = 'display: inline;'
+        google.script.run.withSuccessHandler(displayCalculationsSuccess).calculateIdFields(id_data, period)
+        ids_calculated = true
+      }
     }
+
+    function displayCalculationsSuccess(res) {
+      console.log(res)
+    }
+
+    function createManualForm() {
+      consts.manual_fields_weekly.forEach(field => {
+        var div = document.createElement('div');
+        div.innerHTML = `<label style="margin-bottom: 10px;">${field.name}:</label>`
+        document.getElementById('manual-container').appendChild(div);
+
+        consts.branches.forEach(branch => {
+          var div = document.createElement('div');
+          div.innerHTML = `
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text manual-input-span" id="${field.id}-${branch.short}">${branch.name}</span>
+              </div>
+              <input type="text" class="form-control manual-input" id="${field.id}-${branch.short}-input" aria-describedby="${field.id}-${branch.short}">
+            </div>
+          `;
+          document.getElementById('manual-container').appendChild(div);
+        })
+      })
+    }
+
+    function skipManual() {
+      document.getElementById(`add-manual-data`).style = "display: none;"
+      document.getElementById(`add-recall-success-data`).style = "display: inline;"
+      document.getElementById(`p-period-recall-success`).innerText = `Upload Detailed Reports`
+    }
+
+    function skipRecall() {
+      addRecallSuccess()
+    }
+    
+    function skipIds() {
+      document.getElementById(`upload-ids`).style = 'display: none;'
+      document.getElementById(`upload-weekly`).style = 'display: inline;'
+    }
+
+    function addManualData(){
+      const inputs = document.getElementsByClassName("manual-input");
+      const spans = document.getElementsByClassName("manual-input-span");
+      let data = []
+
+      for(let i = 0; i < inputs.length; i++) {
+        let field
+        for(let j = 0; j < consts.manual_fields_weekly.length; j++) {
+          if (inputs[i].id.indexOf(consts.manual_fields_weekly[j].id) != -1) {
+            field = consts.manual_fields_weekly[j].name
+          }
+        }
+        if (!isNaN(inputs[i].value) && inputs[i].value != "") {
+          data.push({
+            qtr: period.qtr,
+            week: period.week.toLowerCase(),
+            target_column: field,
+            branch: spans[i].textContent,
+            value: inputs[i].value
+          })
+        } 
+      }
+      document.getElementById(`add-manual-data-error-msg`).style = "color: green; display: inline; font-size: 0.76em;"
+      document.getElementById(`add-manual-data-error-msg`).innerText = "Wait a second, processing data..."
+      google.script.run.withSuccessHandler(displaySuccessManual).pasteWeeklyValues(data, "DB (WEEKLY)")
+    }
+
+    function displaySuccessManual(res) {
+      if(res == "DB (WEEKLY)") {
+        document.getElementById(`add-manual-data`).style = "display: none;"
+        document.getElementById(`add-recall-success-data`).style = "display: inline;"
+        document.getElementById(`p-period-recall-success`).innerText = `Upload Detailed Reports`
+      }
+    }
+
+    function createRecallSuccessForm() {
+      var div = document.createElement('div');
+      document.getElementById('recall-success-container').appendChild(div);
+
+      consts.branches.forEach(branch => {
+        var div = document.createElement('div');
+        div.innerHTML = `
+          <form>
+            <label id="label-RecallSuccess-${branch.short}" for="RecallSuccess-${branch.short}" class="form-label">Recall Success ${branch.name}</label>
+            <input class="form-control form-control-sm" id="RecallSuccess-${branch.short}" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'RecallSuccess-${branch.short}')" name="file">
+          </form>
+          <br>
+        `;
+        document.getElementById('recall-success-container').appendChild(div);
+      })
+    }
+
+    function addRecallSuccess() {
+      document.getElementById(`add-recall-success-data`).style = "display: none;"
+      document.getElementById(`upload-ids`).style = "display: inline;"
+      document.getElementById(`p-period-ids`).innerText = `Upload Basic Reports`
+    }
+
     </script>
   </body>
 </html>
