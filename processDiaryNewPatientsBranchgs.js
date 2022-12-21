@@ -60,9 +60,3 @@ function process_DiaryNewPatientsBranch_Id (data, period) {
   
   return value_objects
 }
-
-
-
-
-
-
