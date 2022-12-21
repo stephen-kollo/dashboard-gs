@@ -35,11 +35,8 @@ const WEEKLY_DATABASE_COLUMNS = [
     "Family & Friends",
     "Number with no Why Us",
     "Branch Count",
-    "Increase/Decrease",
     "Silver Plan Count",
-    "Increase/Decrease",
     "Gold Plan Count",
-    "Increase/Decrease",
     ]
 
 const ID_DATABASE_COLUMNS = [
@@ -70,9 +67,73 @@ const ID_DATABASE_COLUMNS = [
 "Name"
 ]
 
-
+const MANUAL_FIELDS_WEEKLY = [
+  {name: 'Number of Px on Recall List in Next 12 Months Rolling', id: 'px-on-recall'}, 
+  {name: 'Number of Clients Added to Reactivation', id: 'added-to-reactivation'},
+  {name: '# New EE - Google Ads', id: 'ee-google-ads'}
+]
 const CARE_PLANS = ['Gold', 'Silver']
-const BRANCHES = ['Middleton', 'Heald Green', 'Heckmondwike', 'Cheadle']
+const BRANCHES = [
+  {
+    name: 'Middleton',
+    short: 'MD'
+  }, 
+  {
+    name: 'Heald Green',
+    short: 'HG'
+  }, 
+  {
+    name: 'Heckmondwike',
+    short: 'HMD'
+  }, 
+  {
+    name: 'Cheadle',
+    short: 'CH'
+  }
+]
 
+const COLUMN_LETTERS = [
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+  'AA',
+  'AB',
+  'AC',
+  'AD',
+  'AE',
+  'AF',
+  'AG',
+  'AH',
+  'AI',
+  'AJ',
+  'AK',
+  'AL',
+]
 
+function getConsts(){
+  return  { 
+    branches: BRANCHES,
+    manual_fields_weekly: MANUAL_FIELDS_WEEKLY,
+  }
+}
 
