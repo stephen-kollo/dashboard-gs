@@ -40,11 +40,14 @@
         <div class="w-50">
           <select id="qtr-select" class="form-select" aria-label=".form-select-sm example">
             <option selected>Select QTR</option>
-            <option value="2022 / 1">2022 / 1</option>
-            <option value="2022 / 2">2022 / 2</option>
-            <option value="2022 / 3">2022 / 3</option>
-            <option value="2022 / 4">2022 / 4</option>
-            <option value="2023 / 1">2023 / 1</option>
+            <option value="2022 / 1">Q1 22/23 Nov - Jan</option>
+            <option value="2022 / 2">Q2 22/23 Feb - April</option>
+            <option value="2022 / 3">Q3 22/23 May - July</option>
+            <option value="2022 / 4">Q4 22/23 Aug - Oct</option>
+            <option value="2023 / 1">Q1 23/24 Nov - Jan</option>
+            <option value="2023 / 2">Q2 23/24 Feb - April</option>
+            <option value="2023 / 3">Q3 23/24 May - July</option>
+            <option value="2023 / 4">Q4 23/24 Nov - Jan</option>
           </select>
         </div>
       </div>
@@ -64,11 +67,6 @@
     <!-- MANUAL ENTRY -->
     <div id="add-manual-data" style="display: none;">
       <p id="p-period-manual"></p>
-      <!-- <div>
-        <a id="p-period-manual"></a>
-        <br>
-        <button type="button" class="btn btn-link p-0 m-0" onclick="skipManual()">Skip this part</button>
-      </div> -->
       <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
       <br>
       <div id="manual-container"></div>
@@ -81,11 +79,6 @@
     <!-- RECALL SUCCESS -->
     <div id="add-recall-success-data" style="display: none;">
       <p id="p-period-recall-success"></p>
-      <!-- <div>
-        <a id="p-period-recall-success"></a>
-        <br>
-        <button type="button" class="btn btn-link p-0 m-0" onclick="skipRecall()">Skip this part</button>
-      </div> -->
       <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
       <br>
       <div id="recall-success-container"></div>
@@ -98,11 +91,6 @@
     <!-- UPLOAD IDs -->
     <div id="upload-ids" style="display: none;">
       <p id="p-period-ids"></p>
-      <!-- <div>
-        <a id="p-period-ids"></a>
-        <br>
-        <button type="button" class="btn btn-link p-0 m-0" onclick="skipIds()">Skip this part</button>
-      </div> -->
       <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
       <br>
       <form>
@@ -130,8 +118,8 @@
     <!-- UPLOAD WEEKLY -->
     <div id="upload-weekly" style="display: none;">
       <form>
-        <label id="label-BranchKpiSummaryData" for="BranchKpiSummaryData" class="form-label">Branch KPI Summary</label>
-        <input class="form-control form-control-sm" id="BranchKpiSummaryData" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'BranchKpiSummaryData')" name="file">
+        <label id="label-TillOpticianPerformanceAnalysis" for="TillOpticianPerformanceAnalysis" class="form-label">Till Optician Performance Analysis</label>
+        <input class="form-control form-control-sm" id="TillOpticianPerformanceAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'TillOpticianPerformanceAnalysis')" name="file">
       </form>
 
       <br>
@@ -165,13 +153,6 @@
       <br>
 
       <form>
-        <label id="label-TillOpticianPerformanceAnalysis" for="TillOpticianPerformanceAnalysis" class="form-label">Till Optician Performance Analysis</label>
-        <input class="form-control form-control-sm" id="TillOpticianPerformanceAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'TillOpticianPerformanceAnalysis')" name="file">
-      </form>
-      
-      <br>
-
-      <form>
         <label id="label-SchemeAnalysis" for="SchemeAnalysis" class="form-label">Scheme Analysis</label>
         <input class="form-control form-control-sm" id="SchemeAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importFile(this.parentNode, 'SchemeAnalysis')" name="file">
       </form>
@@ -193,10 +174,10 @@
     
     function writeConsts(res) {
       consts = {
-        manual_fields_weekly: res.manual_fields_weekly,
+        // manual_fields_weekly: res.manual_fields_weekly,
         branches: res.branches
       }
-      createManualForm()
+      // createManualForm()
       createRecallSuccessForm()
     }
 
@@ -232,8 +213,10 @@
           qtr: res.new_qtr
         }
         document.getElementById(`select-period`).style = "display: none;"
-        document.getElementById(`add-manual-data`).style = "display: inline;"
-        document.getElementById(`p-period-manual`).innerText = `Enter Manual Data`
+        // just skiping manual entry step for now
+        displaySuccessManual("DB (WEEKLY)")
+        // document.getElementById(`add-manual-data`).style = "display: inline;"
+        // document.getElementById(`p-period-manual`).innerText = `Enter Manual Data`
       } else {
         document.getElementById(`select-period-status`).style = "color: red; display: inline; font-size: 0.76em;"
         document.getElementById(`select-period-status`).innerText = res.err
@@ -246,7 +229,7 @@
         file = e.file.files[0];
         const f = new FileReader();
         console.log(period)
-        f.onload = d => google.script.run.withSuccessHandler(displaySuccess).importFile([[...new Int8Array(d.target.result)], file.type, file.name], doc_name, period_temp);
+        f.onload = d => google.script.run.withSuccessHandler(displaySuccess).importFile([[...new Int8Array(d.target.result)], file.type, file.name], doc_name, period_temp, id_data);
         f.readAsArrayBuffer(file);
       } else {
         processExcel(document.getElementById(doc_name).files[0], doc_name, period_temp)
@@ -365,9 +348,6 @@
     }
 
     function createRecallSuccessForm() {
-      var div = document.createElement('div');
-      document.getElementById('recall-success-container').appendChild(div);
-
       consts.branches.forEach(branch => {
         var div = document.createElement('div');
         div.innerHTML = `
@@ -390,3 +370,7 @@
     </script>
   </body>
 </html>
+
+
+
+
