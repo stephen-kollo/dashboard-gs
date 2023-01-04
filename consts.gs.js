@@ -1,3 +1,5 @@
+TEST_SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1FKLr8AtHocGtE_9vKZGfqunz20WqcjYiY9aXcYB2_uI/edit?usp=sharing'
+
 const WEEKLY_DATABASE_COLUMNS = [
     "QTR",
     "Week",
@@ -72,7 +74,9 @@ const MANUAL_FIELDS_WEEKLY = [
   {name: 'Number of Clients Added to Reactivation', id: 'added-to-reactivation'},
   {name: '# New EE - Google Ads', id: 'ee-google-ads'}
 ]
+
 const CARE_PLANS = ['Gold', 'Silver']
+
 const BRANCHES = [
   {
     name: 'Middleton',
@@ -137,3 +141,47 @@ function getConsts(){
   }
 }
 
+const DAILY_DATABASE_COLUMNS = [
+"Date",
+"Number of Clinics",
+"Avg EE Multiplier",
+"Total Sales",
+"Prof Fees",
+"Dispensed Sales",
+"Till Takings",
+"% Conv Rate - Call to Booking",
+"Total Number of EE Booked",
+"Number of EE Booked for Next Year",
+"Number of EE Completed",
+"Number of CUES completed",
+"Number of Dispensing Opportunities",
+"% Conv Rate - EE to Dispense",
+"Number of Paid OCT's",
+"Number of Contact Lens Signups",
+"Number of EyeCare Plan Signups",
+"% CR - Dispensing Opportunities to Spec Sale",
+"AVG Dispensed Value £",
+"Number of New EE Dispensed",
+"Number of Additional Pairs Dispensed",
+"Aged Debt £"
+]
+
+const MANUAL_FIELDS_DAILY = [
+  {name: 'Number of Clinics', id: 'number-of-clinics'},
+  {name: 'Avg EE Multiplier', id: 'avg-ee-multiplier'},
+  {name: 'Total Number of EE Booked', id: 'total-number-of-ee-booked'},
+  {name: 'Number of EE Booked for Next Year', id: 'number-of-ee-booked-for-next-year'},
+  {name: 'Number of Dispensing Opportunities', id: 'number-of-disp-opportunities'},
+  {name: "Number of Paid OCT's", id: 'number-of-paid-octs'},
+  {name: 'Number of Contact Lens Signups', id: 'number-of-contact-lens-signups'},
+  {name: 'Number of EyeCare Plan Signups', id: 'number-of-eyecare-plan-signups'},
+  {name: 'Number of New EE Dispensed', id: 'number-of-new-ee-disp'}
+]
+
+
+
+function getConstsDaily(){
+  return  { 
+    manual_fields_daily: MANUAL_FIELDS_DAILY,
+  }
+}
