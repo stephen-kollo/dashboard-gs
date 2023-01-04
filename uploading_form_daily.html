@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body style="padding: 10px;">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <style type="text/css">            
+      .datepicker td, .datepicker th {
+        width: 2em;
+        height: 2em;
+      }
+    </style>
+    <script type="text/javascript">
+        $('#datepicker').datepicker({
+            weekStart: 1,
+            daysOfWeekHighlighted: "6,0",
+            autoclose: true,
+            todayHighlight: true,
+        });
+        $('#datepicker').datepicker("setDate", new Date());
+    </script>
+
+    <!-- SELECT PERIOD -->
+    <div id="select-period" style="display: inline;">
+      <p>Select Date</p>
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <div style="margin-bottom: 10px;" class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="update-previous-period">
+        <label class="form-check-label" for="flexCheckDefault">
+          Update previous period
+        </label>
+      </div>
+      <div>
+        <input data-date-format="dd/mm/yyyy" id="datepicker">
+      </div>
+      <br>
+      <button id="select-period-button" type="button" class="btn btn-primary" onclick="selectPeriod()">Set Period</button>
+      <br>
+      <p id="select-period-status" style="display: none;">Please select both: Year and Month</p>
+    </div>
+
+    <!-- MANUAL ENTRY -->
+    <div id="add-manual-data" style="display: none;">
+      <p id="p-period-manual"></p>
+      <div style="border-top: 1px solid grey; margin-top: 15px;"></div>
+      <br>
+      <div id="manual-container"></div>
+      <br>
+      <button id="add-manual-data-button" type="button" class="btn btn-primary" onclick="addManualData()">Add Manual Data</button>
+      <br>
+      <p id="add-manual-data-error-msg" style="display: none;">Please fulfill all the data fields with numbers</p>
+    </div>
+
+    <!-- UPLOAD DAILY -->
+    
+    <div id="upload-daily" style="display: none;">
+
+      <form>
+        <label id="label-TillOpticianPerformanceAnalysis" for="TillOpticianPerformanceAnalysis" class="form-label">Till Optician Performance Analysis</label>
+        <input class="form-control form-control-sm" id="TillOpticianPerformanceAnalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'TillOpticianPerformanceAnalysis')" name="file">
+      </form>
+      
+      <br>
+
+      <form>
+        <label id="label-salesanalysis" for="salesanalysis" class="form-label">Sales Analysis</label>
+        <input class="form-control form-control-sm" id="salesanalysis" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'salesanalysis')" name="file">
+      </form>
+
+      <br>
+      
+      <form>
+        <label id="label-takings" for="takings" class="form-label">Takings</label>
+        <input class="form-control form-control-sm" id="takings" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'takings')" name="file">
+      </form>
+
+      <br>
+
+      <form>
+        <label id="label-branchkpisummary" for="branchkpisummary" class="form-label">Branch KPI Summary</label>
+        <input class="form-control form-control-sm" id="branchkpisummary" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'branchkpisummary')" name="file">
+      </form>
+      
+      <br>
+
+      <form>
+        <label id="label-DiaryNewPatientsBranch" for="DiaryNewPatientsBranch" class="form-label">Diary New Patients Branch</label>
+        <input class="form-control form-control-sm" id="DiaryNewPatientsBranch" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'DiaryNewPatientsBranch')" name="file">
+      </form>
+
+      <br>
+      
+      <form>
+        <label id="label-debtors" for="debtors" class="form-label">Debtors</label>
+        <input class="form-control form-control-sm" id="debtors" type="file" accept=".csv,text/csv, .xls, .xslx" onchange="importDailyFile(this.parentNode, 'debtors')" name="file">
+      </form>
+    
+    </div>
+
+    <!-- DATEPICKER SCRIPT -->
+    <script type="text/javascript">
+        $('#datepicker').datepicker({
+            weekStart: 1,
+            daysOfWeekHighlighted: "6,0",
+            autoclose: true,
+            todayHighlight: true,
+        });
+        $('#datepicker').datepicker("setDate", new Date());
+    </script>
+
+     <!-- MAIN SCRIPT -->
+    <script>
+    let date
+    let consts = {
+      manual_fields_daily: [],
+    }
+
+    google.script.run
+      .withSuccessHandler(writeConsts)
+      .getConstsDaily()
+    
+    function writeConsts(res) {
+      consts = {
+        manual_fields_daily: res.manual_fields_daily,
+      }
+      createManualForm()
+    }
+  
+    function selectPeriod() {
+      const date_temp = String(document.getElementById('datepicker').value)
+      
+      const if_update = document.getElementById(`update-previous-period`).checked
+      document.getElementById(`select-period-status`).style = "color: green; display: inline; font-size: 0.76em;"
+      document.getElementById(`select-period-status`).innerText = "Wait a second, checking period..."
+      google.script.run.withSuccessHandler(displayPeriodSuccess).checkPeriodDate(date_temp, if_update)
+    }
+
+    function displayPeriodSuccess(res) {
+      if (res.status) {
+        document.getElementById(`select-period-status`).innerText = "Nice!"
+        date = res.new_date
+        console.log(date)
+        document.getElementById(`select-period`).style = "display: none;"
+        document.getElementById(`add-manual-data`).style = "display: inline;"
+        document.getElementById(`p-period-manual`).innerText = `Enter Manual Data`
+      } else {
+        document.getElementById(`select-period-status`).style = "color: red; display: inline; font-size: 0.76em;"
+        document.getElementById(`select-period-status`).innerText = res.err
+      }
+    }
+
+    function importDailyFile(e, doc_name) {
+      document.getElementById(`label-TillOpticianPerformanceAnalysis`).innerText = document.getElementById(doc_name).files[0].name
+      let date_temp = date
+      if(document.getElementById(doc_name).files[0].name.includes('.csv')) {
+        file = e.file.files[0];
+        const f = new FileReader();
+        console.log(date)
+        f.onload = d => google.script.run.withSuccessHandler(displaySuccess).importDailyFile([[...new Int8Array(d.target.result)], file.type, file.name], doc_name, date_temp);
+        f.readAsArrayBuffer(file);
+      } else {
+        processDailyExcel(document.getElementById(doc_name).files[0], doc_name, date_temp)
+      }
+    }
+
+    function processDailyExcel(file, doc_name, date_temp){
+      try {
+        var reader = new FileReader();
+        reader.readAsBinaryString(file);
+        reader.onload = function(e) {
+            var data = e.target.result;
+            var workbook = XLSX.read(data, {
+                type : 'binary'
+            }); 
+            var roa = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+            google.script.run.withSuccessHandler(displaySuccess).importDailyFile(XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]), doc_name, date_temp);
+            }
+      } catch(e) {
+        console.error(e);
+      }       
+    }
+
+    function displaySuccess(res) {
+      console.log(res)
+      document.getElementById(`label-${res.id}`).style = "color: green"
+    }
+
+    function createManualForm() {
+      consts.manual_fields_daily.forEach(field => {
+        var div = document.createElement('div');
+        document.getElementById('manual-container').appendChild(div);
+
+        var div = document.createElement('div');
+        div.innerHTML = `
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span style="width: 410px;" class="input-group-text manual-input-span" id="${field.id}">${field.name}</span>
+            </div>
+            <input type="text" class="form-control manual-input" id="${field.id}-input" aria-describedby="${field.id}">
+          </div>
+        `;
+        document.getElementById('manual-container').appendChild(div);  
+      })
+    }
+
+    function addManualData(){
+      const inputs = document.getElementsByClassName("manual-input");
+      const spans = document.getElementsByClassName("manual-input-span");
+      let data = []
+
+      for(let i = 0; i < inputs.length; i++) {
+        let field = consts.manual_fields_daily[i].name
+        if (!isNaN(inputs[i].value) && inputs[i].value != "") {
+          data.push({
+            date: date,
+            target_column: field,
+            value: inputs[i].value
+          })
+        }
+      }
+      document.getElementById(`add-manual-data-error-msg`).style = "color: green; display: inline; font-size: 0.76em;"
+      document.getElementById(`add-manual-data-error-msg`).innerText = "Wait a second, processing data..."
+      google.script.run.withSuccessHandler(displaySuccessManual).pasteDailyValues(data, "DB (DAILY)")
+    }
+
+    function displaySuccessManual(res) {
+      if(res.db_name == "DB (DAILY)") {
+        document.getElementById(`add-manual-data`).style = "display: none;"
+        document.getElementById(`upload-daily`).style = 'display: inline;'
+        // document.getElementById(`p-period-recall-success`).innerText = `Upload Detailed Reports`
+      }
+    }
+
+    </script>
+  </body>
+</html>
+
+
+
+
