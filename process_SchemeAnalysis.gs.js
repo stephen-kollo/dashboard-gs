@@ -1,4 +1,4 @@
-function process_SchemeAnalysis (data, period) {
+function process_SchemeAnalysis(data, period) {
   let value_objects = []
   let branch_map = new Map();
   const plans = CARE_PLANS
@@ -11,7 +11,7 @@ function process_SchemeAnalysis (data, period) {
       branch: branch,
       product: '',
       if_key: false,
-      value: 0,
+      value: Number(0),
       target_column: 'Branch Count'
     })
     plans.forEach(plan => {
@@ -29,7 +29,7 @@ function process_SchemeAnalysis (data, period) {
   })
 
   data.forEach(row => {
-    if(row[4].length > 0 && row[0].indexOf('BranchName') == -1) {
+    if(row[4].toString().length > 0 && row[0].indexOf('BranchName') == -1) {
       let key = row[0]
       plans.forEach(plan_name => {
         if(row[1].toLowerCase().indexOf(plan_name.toLowerCase()) != -1) {
@@ -54,6 +54,6 @@ function process_SchemeAnalysis (data, period) {
   branch_map.forEach(obj => {
     value_objects.push(obj)
   })
-
+  
   return value_objects
 }
